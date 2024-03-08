@@ -1,0 +1,31 @@
+version: 2.1  # Specifies the version of the CircleCI configuration syntax
+
+workflows:
+  version: 2  # Specifies the version of CircleCI workflows being used
+  build:
+    jobs:
+      - build:  # Defines a job named 'build'
+          filters:
+            branches:
+              only:
+                - main  # Execute this job only when code is pushed to the 'main' branch.
+
+jobs:
+  build:
+    working_directory: ~/SimpleApplication  # Set the job's working directory
+    docker:
+      - image: circleci/node:10.16.3  # Use a Node.js 10.16.3 Docker image
+    steps:
+      - checkout  # Check out the source code from your repository
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@5'  # Update npm to version 5 
+      - restore_cache:  # Attempt to restore previously cached dependencies
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install-npm
+          command: npm install  # Install project dependencies
+      - save_cache:  # Save dependencies for future builds
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
